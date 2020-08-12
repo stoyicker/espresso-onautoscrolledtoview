@@ -1,0 +1,123 @@
+version: 2.1
+jobs:
+  build_library:
+    docker:
+      - image: circleci/android:api-30
+    steps:
+      - checkout
+      - run: ./gradlew library:assemble
+      - store_artifacts:
+          path: library/build/libs
+          destination: binaries
+      - persist_to_workspace:
+          root: .
+          paths:
+            - library/build/outputs/aar
+  test_library:
+    docker:
+      - image: circleci/android:api-30
+    steps:
+      - checkout
+      - run: ./gradlew library:test
+      - store_test_results:
+          path: library/build/test-results/
+  test_demo:
+    machine:
+      image: ubuntu-1604:202007-01
+    steps:
+      - checkout
+      - run: |
+          docker run \
+          -it \
+          --rm \
+          -v $PWD:/tmp \
+          -w /tmp \
+          -p 6080:6080 \
+          -p 5554:5554 \
+          -p 5555:5555 \
+          -e DEVICE="Samsung Galaxy S10" \
+          budtmo/docker-android-x86-8.1 \
+          ./gradlew demo:cAT
+      - store_test_results:
+          path: demo/build/reports/androidTests/connected
+  ensure_release_allowed:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - run: ./_scripts/ensure_release_allowed.sh
+  release_on_github:
+    docker:
+      - image: circleci/android:api-30
+    steps:
+      - checkout
+      - run: ./gradlew demo:assembleDebug
+      - attach_workspace:
+          at: .
+      - run: ./_scripts/release_github.sh
+  release_library_on_bintray:
+    docker:
+      - image: circleci/android:api-30
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: ./gradlew library:bintrayUpload
+workflows:
+  version: 2.1
+  test:
+    jobs:
+      - build_library
+      - test_library:
+          requires:
+            - build_library
+      - test_demo
+  release:
+    jobs:
+      - build_library:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+      - test_library:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+          requires:
+            - build_library
+      - test_demo:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+      - ensure_release_allowed:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+      - release_on_github:
+          context: onautoscrolledtoview_release_github
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+          requires:
+            - ensure_release_allowed
+            - test_library
+            - test_demo
+      - release_library_on_bintray:
+          context: onautoscrolledtoview_release_bintray_oss
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+          requires:
+            - ensure_release_allowed
+            - test_library
