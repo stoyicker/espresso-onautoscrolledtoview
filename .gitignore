@@ -1,0 +1,16 @@
+.gradle
+local.properties
+*/build/**
+.idea/caches/build_file_checksums.ser
+.idea/jarRepositories.xml
+.idea/misc.xml
+.idea/gradle.xml
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/tasks.xml
+.idea/shelf
+.idea/dictionaties
+.idea/libraries/*.xml
+.idea/**/*.iml
+.idea/modules.xml
+.idea/vcs.xml
