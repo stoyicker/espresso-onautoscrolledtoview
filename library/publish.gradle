@@ -63,7 +63,7 @@ bintray {
     name = project.name
     vcsUrl = "https://github.com/stoyicker/espresso-onautoscrolledtoview"
     licenses = ["MIT"]
-    desc = "An Espresso ViewInteraction for finding views beyond the current contents of the viewport"
+    desc = "An Espresso ViewInteraction for finding views that do not exist"
     publicDownloadNumbers = true
     githubRepo = "stoyicker/espresso-onautoscrolledtoview"
     websiteUrl = "https://github.com/stoyicker/espresso-onautoscrolledtoview"
