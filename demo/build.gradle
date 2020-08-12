@@ -1,0 +1,46 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+    google()
+  }
+  dependencies {
+    classpath "com.android.tools.build:gradle:4.0.1"
+  }
+}
+
+apply plugin: "com.android.application"
+
+final def useGit = System.getenv("CI") != null && "which git".execute().exitValue() == 0
+android {
+  buildToolsVersion "30.0.1"
+  compileSdkVersion 30
+  defaultConfig {
+    applicationId "onautoscrolledtoview.demo"
+    minSdkVersion 10
+    targetSdkVersion 30
+    versionCode useGit ? "git rev-list --count HEAD".execute().text.toInteger() : Integer.MAX_VALUE
+    versionName useGit ? "git describe --abbrev=0".execute().text.trim() : String.valueOf(versionCode)
+    resConfigs "en"
+  }
+  variantFilter {
+    if (it.buildType.name == "release") {
+      it.ignore = true
+    }
+  }
+}
+
+lint.onlyIf {
+  false
+}
+
+repositories {
+  google()
+  jcenter()
+}
+
+dependencies {
+  // Replace by "com.github.stoyicker.espresso-onautoscrolledtoview:library:$version" in your build.gradle
+  androidTestImplementation project(path: ":library")
+}

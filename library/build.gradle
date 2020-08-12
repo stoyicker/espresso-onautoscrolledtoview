@@ -1,0 +1,36 @@
+import java.nio.file.Paths
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5"
+  }
+}
+
+apply plugin: "java-library"
+java {
+  sourceCompatibility JavaVersion.VERSION_1_8
+  targetCompatibility JavaVersion.VERSION_1_8
+  withSourcesJar()
+  withJavadocJar()
+}
+
+repositories {
+  google()
+  jcenter()
+}
+
+dependencies {
+}
+
+gradle.projectsEvaluated {
+  tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:all"
+  }
+}
+
+if (System.getenv("CI") != null && "which git".execute().exitValue() == 0) {
+  apply from: Paths.get(projectDir.absolutePath, 'publish.gradle')
+}
