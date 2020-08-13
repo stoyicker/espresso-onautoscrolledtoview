@@ -23,6 +23,7 @@ android {
     versionCode useGit ? "git rev-list --count HEAD".execute().text.toInteger() : Integer.MAX_VALUE
     versionName useGit ? "git describe --abbrev=0".execute().text.trim() : String.valueOf(versionCode)
     resConfigs "en"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
   }
   variantFilter {
     if (it.buildType.name == "release") {
@@ -42,6 +43,9 @@ repositories {
 
 dependencies {
   implementation "androidx.recyclerview:recyclerview:1.1.0"
+  androidTestImplementation "androidx.test:rules:1.2.0"
+  androidTestImplementation "androidx.test:runner:1.2.0"
+  androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
   // Replace by "com.github.stoyicker.espresso-onautoscrolledtoview:library:$version" in your build.gradle
   androidTestImplementation project(path: ":library")
 }
