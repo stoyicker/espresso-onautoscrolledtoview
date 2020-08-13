@@ -18,7 +18,7 @@ android {
   compileSdkVersion 30
   defaultConfig {
     applicationId "onautoscrolledtoview.demo"
-    minSdkVersion 10
+    minSdkVersion 14
     targetSdkVersion 30
     versionCode useGit ? "git rev-list --count HEAD".execute().text.toInteger() : Integer.MAX_VALUE
     versionName useGit ? "git describe --abbrev=0".execute().text.trim() : String.valueOf(versionCode)
@@ -41,6 +41,7 @@ repositories {
 }
 
 dependencies {
+  implementation "androidx.recyclerview:recyclerview:1.1.0"
   // Replace by "com.github.stoyicker.espresso-onautoscrolledtoview:library:$version" in your build.gradle
   androidTestImplementation project(path: ":library")
 }
