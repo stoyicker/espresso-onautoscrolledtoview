@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run: ./gradlew library:assemble
       - store_artifacts:
-          path: library/build/libs
+          path: library/build/outputs/aar
           destination: binaries
       - persist_to_workspace:
           root: .

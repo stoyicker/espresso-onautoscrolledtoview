@@ -3,18 +3,38 @@ import java.nio.file.Paths
 buildscript {
   repositories {
     jcenter()
+    google()
   }
   dependencies {
     classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5"
+    classpath "com.android.tools.build:gradle:$gradlePluginVersion"
   }
 }
 
-apply plugin: "java-library"
-java {
-  sourceCompatibility JavaVersion.VERSION_1_8
-  targetCompatibility JavaVersion.VERSION_1_8
-  withSourcesJar()
-  withJavadocJar()
+apply plugin: "com.android.library"
+
+final def useGit = System.getenv("CI") != null && "which git".execute().waitFor() == 0
+android {
+  buildToolsVersion _buildToolsVersion
+  compileSdkVersion _compileSdkVersion.toInteger()
+  buildTypes {
+    release {
+      minifyEnabled false
+      consumerProguardFiles "proguard/rules.pro"
+    }
+  }
+  defaultConfig {
+    minSdkVersion 17
+    targetSdkVersion 30
+    versionCode useGit ? "git rev-list --count HEAD".execute().text.toInteger() : Integer.MAX_VALUE
+    versionName useGit ? "git describe --abbrev=0".execute().text.trim() : String.valueOf(versionCode)
+    resConfigs "en"
+  }
+  variantFilter {
+    if (it.buildType.name == "debug") {
+      it.ignore = true
+    }
+  }
 }
 
 repositories {
@@ -22,11 +42,10 @@ repositories {
   jcenter()
 }
 
-final def junitVersion = "5.6.2"
 dependencies {
-  compileOnly files("libs/espresso-core-${espressoVersion}.classes.jar")
-  testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+  compileOnly "org.projectlombok:lombok:1.18.12"
+  annotationProcessor "org.projectlombok:lombok:1.18.12"
+  implementation "androidx.test.espresso:espresso-core:$espressoVersion"
 }
 
 gradle.projectsEvaluated {
@@ -35,6 +54,6 @@ gradle.projectsEvaluated {
   }
 }
 
-if (System.getenv("CI") != null && "which git".execute().exitValue() == 0) {
+if (System.getenv("CI") != null && "which git".execute().waitFor() == 0) {
   apply from: Paths.get(projectDir.absolutePath, 'publish.gradle')
 }

@@ -1,6 +1,8 @@
 package onautoscrolledtoview.demo;
 
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -11,6 +13,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
+import java.util.Locale;
+
 import onautoscrolledtoview.OnAutoScrolledToView;
 
 import static androidx.test.espresso.Espresso.onView;
@@ -20,15 +24,25 @@ import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-public final class VerticalFromStartDemoActivityTest {
+public final class LTRHorizontalFromStartDemoActivityTest {
   @Rule
   public final TestRule activityTestRule = new ActivityTestRule<DemoActivity>(DemoActivity.class) {
+    @Override
+    protected void beforeActivityLaunched() {
+      final Resources resources = InstrumentationRegistry.getInstrumentation()
+          .getTargetContext()
+          .getResources();
+      final Configuration configuration = resources.getConfiguration();
+      configuration.setLayoutDirection(new Locale("es"));
+      resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+    }
+
     @Override
     protected Intent getActivityIntent() {
       return DemoActivity.newCallingIntent(
           InstrumentationRegistry.getInstrumentation().getTargetContext(),
           0,
-          LinearLayoutManager.VERTICAL);
+          LinearLayoutManager.HORIZONTAL);
     }
   };
 
@@ -49,7 +63,13 @@ public final class VerticalFromStartDemoActivityTest {
 
   @Test
   public void element99ExistsWithAutoScroll() {
-    OnAutoScrolledToView.onAutoScrolledToView(withText("\n[99]\n")).check(
-        matches(isDisplayed()));
+    OnAutoScrolledToView.onAutoScrolledToView(
+        withText("\n[99]\n"),
+        OnAutoScrolledToView.Options.builder()
+            .directionalPxDeltaPerScroll(
+                new OnAutoScrolledToView.DirectionalPxDelta(
+                    OnAutoScrolledToView.DirectionalPxDelta.Towards.END))
+            .build())
+        .check(matches(isDisplayed()));
   }
 }

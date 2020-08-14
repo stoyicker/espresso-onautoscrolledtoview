@@ -26,7 +26,9 @@ public final class DemoActivity extends Activity {
 
   public static Intent newCallingIntent(
       final Context context, final int scrollToPosition, final int linearLayoutManagerOrientation) {
-    return new Intent(context, DemoActivity.class);
+    return new Intent(context, DemoActivity.class)
+        .putExtra(KEY_SCROLL_TO_POSITION, scrollToPosition)
+        .putExtra(KEY_LINEARLAYOUTMANAGER_ORIENTATION, linearLayoutManagerOrientation);
   }
 
   private static final String KEY_SCROLL_TO_POSITION = "KEY_SCROLL_TO_POSITION";

@@ -1,24 +1,27 @@
 buildscript {
   repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
+    jcenter()
     google()
   }
   dependencies {
-    classpath "com.android.tools.build:gradle:4.0.1"
+    classpath "com.android.tools.build:gradle:$gradlePluginVersion"
   }
 }
 
 apply plugin: "com.android.application"
 
-final def useGit = System.getenv("CI") != null && "which git".execute().exitValue() == 0
+final def useGit = System.getenv("CI") != null && "which git".execute().waitFor() == 0
 android {
-  buildToolsVersion "30.0.1"
-  compileSdkVersion 30
+  buildToolsVersion _buildToolsVersion
+  compileSdkVersion _compileSdkVersion.toInteger()
+  buildTypes {
+    debug {
+      matchingFallbacks = ["release"]
+    }
+  }
   defaultConfig {
     applicationId "onautoscrolledtoview.demo"
-    minSdkVersion 14
+    minSdkVersion 17
     targetSdkVersion 30
     versionCode useGit ? "git rev-list --count HEAD".execute().text.toInteger() : Integer.MAX_VALUE
     versionName useGit ? "git describe --abbrev=0".execute().text.trim() : String.valueOf(versionCode)

@@ -6,7 +6,8 @@
         android:allowBackup="true"
         android:fullBackupContent="false"
         android:icon="@null"
-        android:label="onAutoScrolledToView demo">
+        android:label="onAutoScrolledToView demo"
+        android:supportsRtl="true">
         <activity android:name=".DemoActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -25,10 +25,10 @@ uploadReleaseToGitHub() {
   # Extract the upload_url value
   UPLOAD_URL=$(echo ${RESPONSE_BODY} | jq -r .upload_url)
 
-  cp library/build/outputs/jar/library-${THIS_TAG}.jar library.jar
+  cp library/build/outputs/aar/library-release.aar library.aar
 
   # Attach library
-  LIBRARY_UPLOAD_URL=$(echo ${UPLOAD_URL} | sed "s/{?name,label}/?name=library-${THIS_TAG}.jar/")
+  LIBRARY_UPLOAD_URL=$(echo ${UPLOAD_URL} | sed "s/{?name,label}/?name=library-${THIS_TAG}.aar/")
   curl -s \
     -v \
     -u "${CIRCLE_USERNAME}":"${GITHUB_TOKEN}" \

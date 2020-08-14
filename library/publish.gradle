@@ -7,15 +7,34 @@ project.version = {
   return stdout.toString().replaceAll("[^\\d|.]", "")
 }()
 
+task sourcesJar(type: Jar) {
+  group = JavaBasePlugin.DOCUMENTATION_GROUP
+  description = "Assembles a sources JAR"
+  archiveClassifier.set("sources")
+  archiveFileName = "${project.name}-sources.jar"
+  from android.sourceSets.main.java.srcDirs
+}
+
+task javadocJar(type: Jar) {
+  group = JavaBasePlugin.DOCUMENTATION_GROUP
+  description = "Assembles a javadoc JAR"
+  archiveClassifier.set("javadoc")
+  archiveFileName = "${project.name}-javadoc.jar"
+  // As of right now there is no support for extracting javadoc from an AAR,
+  // so publish the sources JAR as javadoc since it includes javadoc
+  from android.sourceSets.main.java.srcDirs
+}
+
 apply plugin: "maven-publish"
 apply plugin: "com.jfrog.bintray"
 publishing {
   publications {
     library(MavenPublication) {
-      from components.java
       artifactId project.name
       version project.version
       artifact "${project.buildDir}/outputs/aar/library-release.aar"
+      artifact sourcesJar
+      artifact javadocJar
       groupId "com.github.stoyicker.onautoscrolledtoview"
       pom {
         name = project.name
