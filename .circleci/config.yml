@@ -1,5 +1,14 @@
 version: 2.1
 jobs:
+  build_demo:
+    docker:
+      - image: circleci/android:api-30
+    steps:
+      - checkout
+      - run: ./gradlew demo:assemble
+      - store_artifacts:
+          path: demo/build/outputs/apk/debug
+          destination: binaries
   build_library:
     docker:
       - image: circleci/android:api-30
@@ -40,6 +49,7 @@ workflows:
   version: 2.1
   check:
     jobs:
+      - build_demo
       - build_library
   release:
     jobs:
