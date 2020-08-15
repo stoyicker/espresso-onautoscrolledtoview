@@ -13,14 +13,6 @@ jobs:
           root: .
           paths:
             - library/build/outputs/aar
-  test_library:
-    docker:
-      - image: circleci/android:api-30
-    steps:
-      - checkout
-      - run: ./gradlew library:test
-      - store_test_results:
-          path: library/build/test-results/
   ensure_release_allowed:
     docker:
       - image: cimg/base:2020.01
@@ -46,12 +38,9 @@ jobs:
       - run: ./gradlew library:bintrayUpload
 workflows:
   version: 2.1
-  test:
+  check:
     jobs:
       - build_library
-      - test_library:
-          requires:
-            - build_library
   release:
     jobs:
       - build_library:
@@ -60,14 +49,6 @@ workflows:
               ignore: /.*/
             tags:
               only: /.*/
-      - test_library:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
-          requires:
-            - build_library
       - ensure_release_allowed:
           filters:
             branches:
@@ -83,7 +64,7 @@ workflows:
               only: /.*/
           requires:
             - ensure_release_allowed
-            - test_library
+            - build_library
       - release_library_on_bintray:
           context: onautoscrolledtoview_release_bintray_oss
           filters:
@@ -93,4 +74,4 @@ workflows:
               only: /.*/
           requires:
             - ensure_release_allowed
-            - test_library
+            - build_library
