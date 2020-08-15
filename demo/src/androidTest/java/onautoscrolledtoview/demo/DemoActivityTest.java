@@ -11,10 +11,13 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-public final class DemoActivityTest {
+abstract class DemoActivityTest {
   @Rule
-  public final ActivityTestRule<DemoActivity> activityRule =
-      new ActivityTestRule<>(DemoActivity.class);
+  public final ActivityTestRule<DemoActivity> activityTestRule;
+
+  DemoActivityTest(final ActivityTestRule<DemoActivity> activityTestRule) {
+    this.activityTestRule = activityTestRule;
+  }
 
   @Test
   public void element0IsVisible() {
