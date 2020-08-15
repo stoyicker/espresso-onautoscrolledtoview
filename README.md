@@ -37,7 +37,10 @@ matcher.
 There is one method that is your entry point to interacting with this library:
 
 ```java
-public void onAutoScrolledToView(Matcher<View>, Options) {
+package onautoscrolledtoview;
+
+public final class OnAutoScrolledToView {
+  public static void onAutoScrolledToView(Matcher<View>, Options)
 }
 ```
 
