@@ -4,7 +4,7 @@ project.version = {
     commandLine "git", "describe", "--abbrev=0"
     standardOutput = stdout
   }
-  return stdout.toString().replaceAll("[^\\d|.]", "")
+  return stdout.toString()
 }()
 
 task sourcesJar(type: Jar) {
