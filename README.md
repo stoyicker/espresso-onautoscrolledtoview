@@ -8,7 +8,7 @@ repositories {
   jcenter()
 }
 dependencies {
-  androidTestImplementation "com.github.stoyicker.espresso-onautoscrolledtoview:library:<version>"
+  androidTestImplementation "com.github.stoyicker.onautoscrolledtoview:library:<version>"
 }
 ```
 
