@@ -63,7 +63,8 @@ See [the instrumented tests in demo](demo/src/androidTest/java/onautoscrolledtov
 examples.
 
 ### Compatibility
-This library requires API 17. It is also implicitly compatible with both LTR and RTL layouts.
+This library requires API 17. It is implicitly __compatible with both LTR and RTL layouts, as well 
+as any type of view__.
 
 ## Versioning
 Stable versions of this tool follow espresso-core's versioning. Therefore, every released version is
