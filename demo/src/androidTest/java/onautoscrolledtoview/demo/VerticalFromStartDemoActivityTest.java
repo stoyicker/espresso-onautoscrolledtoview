@@ -11,14 +11,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
-import onautoscrolledtoview.OnAutoScrolledToView;
-
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static onautoscrolledtoview.OnAutoScrolledToView.onAutoScrolledToView;
 
 public final class VerticalFromStartDemoActivityTest {
   @Rule
@@ -49,7 +49,13 @@ public final class VerticalFromStartDemoActivityTest {
 
   @Test
   public void element99ExistsWithAutoScroll() {
-    OnAutoScrolledToView.onAutoScrolledToView(withText("\n[99]\n")).check(
+    onAutoScrolledToView(withText("\n[99]\n"), withId(R.id.my_recyclerview)).check(
         matches(isDisplayed()));
+  }
+
+  @Test
+  public void element100DoesNotExistWithAutoScroll() {
+    onAutoScrolledToView(withText("\n[100]\n"), withId(R.id.my_recyclerview)).check(
+        doesNotExist());
   }
 }

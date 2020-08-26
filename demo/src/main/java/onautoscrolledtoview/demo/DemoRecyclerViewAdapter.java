@@ -20,6 +20,6 @@ final class DemoRecyclerViewAdapter extends RecyclerView.Adapter<DemoRecyclerVie
 
   @Override
   public int getItemCount() {
-    return Integer.MAX_VALUE;
+    return 100;
   }
 }

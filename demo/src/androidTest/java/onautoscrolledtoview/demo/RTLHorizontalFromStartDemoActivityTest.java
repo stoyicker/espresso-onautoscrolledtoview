@@ -22,7 +22,9 @@ import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static onautoscrolledtoview.OnAutoScrolledToView.onAutoScrolledToView;
 
 public final class RTLHorizontalFromStartDemoActivityTest {
   @Rule
@@ -63,13 +65,25 @@ public final class RTLHorizontalFromStartDemoActivityTest {
 
   @Test
   public void element99ExistsWithAutoScroll() {
-    OnAutoScrolledToView.onAutoScrolledToView(
+    onAutoScrolledToView(
         withText("\n[99]\n"),
+        withId(R.id.my_recyclerview),
         OnAutoScrolledToView.Options.builder()
-            .directionalPxDeltaPerScroll(
-                new OnAutoScrolledToView.DirectionalPxDelta(
-                    OnAutoScrolledToView.DirectionalPxDelta.Towards.END))
+            .axisPxDeltaPerScroll(new OnAutoScrolledToView.AxisPxDelta(
+                OnAutoScrolledToView.AxisPxDelta.Axis.HORIZONTAL))
             .build())
         .check(matches(isDisplayed()));
+  }
+
+  @Test
+  public void element100DoesNotExistWithAutoScroll() {
+    onAutoScrolledToView(
+        withText("\n[100]\n"),
+        withId(R.id.my_recyclerview),
+        OnAutoScrolledToView.Options.builder()
+            .axisPxDeltaPerScroll(new OnAutoScrolledToView.AxisPxDelta(
+                OnAutoScrolledToView.AxisPxDelta.Axis.HORIZONTAL))
+            .build())
+        .check(doesNotExist());
   }
 }

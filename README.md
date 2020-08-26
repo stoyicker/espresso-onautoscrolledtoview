@@ -1,6 +1,6 @@
 # espresso-onautoscrolledtoview
 ### An Espresso ViewInteraction for finding views that do not exist
-[![CircleCI](https://circleci.com/gh/stoyicker/espresso-onautoscrolledtoview.svg?style=svg)](https://circleci.com/gh/stoyicker/espresso-onautoscrolledtoview)
+
 ## Usage
 [ ![Download](https://api.bintray.com/packages/stoyicker/espresso-onautoscrolledtoview/library/images/download.svg) ](https://search.maven.org/search?q=g:com.github.stoyicker.espresso-onautoscrolledtoview)
 ```groovy
@@ -25,10 +25,13 @@ indexes.
 To address that, this tool provides the capability of specifying the View that needs to be located
 not with an index, but with a regular Hamcrest `Matcher<View>`, exactly the same way as regular
 `Espresso.onView(Matcher<View>)` works. In fact, this is how this tool works too: it uses your own
-matcher to evaluate your matcher against the viewport: if the evaluation fails, it simulates a 
-finger swipe gesture with the hopes of it resulting in a different viewport, and then repeats 
-(or times out); if the evaluations succeeds, it returns `Espresso.onView(Matcher<View>)` with your 
-matcher.
+matcher to evaluate your matcher against the current view hierarchy: if the evaluation fails, it
+simulates a finger swipe gesture with the hopes of it resulting in a different view state, and then 
+repeats (or times out); if the evaluations succeeds, it returns `Espresso.onView(Matcher<View>)` 
+with your matcher.
+
+Note that if for example you have a RecyclerView and want to assert the position of your item in it,
+you can still include such assertion in the matcher that you provide. 
 
 ## What does it look like?
 ![Demo gif](demo.gif)
@@ -40,15 +43,16 @@ There is one method that is your entry point to interacting with this library:
 package onautoscrolledtoview;
 
 public final class OnAutoScrolledToView {
-  public static void onAutoScrolledToView(Matcher<View>, Options)
+  public static void onAutoScrolledToView(Matcher<View>, Matcher<View>, Options)
 }
 ```
 
-The first parameter is the matcher that describes a
-condition to use to find your view, and the second one carries configuration that you may use to
+The first parameter is the matcher that describes a condition to use to find your view, the second 
+one is used to find the view to perform scrolling on (must be a direct or indirect parent of the
+view depicted by the first one), and the third one carries configuration that you may use to 
 customize the scrolling behavior.
 
-You may use `Options.builder()` to get an instance. See [Options](library/src/main/java/onautoscrolledtoview/OnAutoScrolledToView.java#L23)
+You may use `Options.builder()` to get a builder instance. See [Options](library/src/main/java/onautoscrolledtoview/OnAutoScrolledToView.java#L24)
 for documentation and defaults that are used for each field if unset (or when using 
 `onAutoScrolledToView(Matcher<View>)`, the `Options`-less overload instead).
 
@@ -57,6 +61,12 @@ and it returns successfully, so you may continue to use it as such:
 
 ```java
 onAutoScrolledToView(withId(R.id.your_id)).check(matches(isDisplayed()));
+```
+
+It also works for assertions in the form of matchers, such as `doesNotExist()`:
+
+```java
+onAutoScrolledToView(withText("your text")).check(doesNotExist());
 ```
 
 See [the instrumented tests in demo](demo/src/androidTest/java/onautoscrolledtoview/demo) for more

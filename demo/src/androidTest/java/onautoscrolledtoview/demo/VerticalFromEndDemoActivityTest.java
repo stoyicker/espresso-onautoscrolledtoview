@@ -11,14 +11,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 
-import onautoscrolledtoview.OnAutoScrolledToView;
-
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static onautoscrolledtoview.OnAutoScrolledToView.onAutoScrolledToView;
 
 public final class VerticalFromEndDemoActivityTest {
   @Rule
@@ -49,13 +49,13 @@ public final class VerticalFromEndDemoActivityTest {
 
   @Test
   public void element0ExistsWithAutoScroll() {
-    OnAutoScrolledToView.onAutoScrolledToView(
-        withText("\n[0]\n"),
-        OnAutoScrolledToView.Options.builder()
-            .directionalPxDeltaPerScroll(
-                new OnAutoScrolledToView.DirectionalPxDelta(
-                    OnAutoScrolledToView.DirectionalPxDelta.Towards.TOP))
-            .build())
-        .check(matches(isDisplayed()));
+    onAutoScrolledToView(withText("\n[0]\n"), withId(R.id.my_recyclerview)).check(
+        matches(isDisplayed()));
+  }
+
+  @Test
+  public void elementMinus1DoesNotExistWithAutoScroll() {
+    onAutoScrolledToView(withText("\n[-1]\n"), withId(R.id.my_recyclerview)).check(
+        doesNotExist());
   }
 }
