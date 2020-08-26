@@ -5,133 +5,151 @@ import android.view.View;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Px;
+import androidx.test.espresso.PerformException;
 import androidx.test.espresso.ViewInteraction;
 
 import org.hamcrest.Matcher;
-
-import java.util.concurrent.TimeUnit;
+import org.hamcrest.core.IsAnything;
 
 import lombok.Builder;
 import lombok.Getter;
 import onautoscrolledtoview.internal.OnAutoScrolledToViewImpl;
+import onautoscrolledtoview.internal.RepeatActionUntilViewStateOnAnotherViewViewAction;
 
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
+import static androidx.test.espresso.Espresso.onView;
+import static org.hamcrest.Matchers.not;
 
 @Keep
 public final class OnAutoScrolledToView {
-  @Builder
+  @Builder(toBuilder = true)
   public static final class Options {
     /**
-     * A {@link Matcher<View>} that describes which view to perform the swipe on. In most scenarios
-     * you should not care about this, but you may be interested in using it in particular cases
-     * such as when you have more than one RecyclerView in the viewport at a time or when testing
-     * an app in multi-window mode.
+     * Describes each scroll to be performed on the view by combining the pointer displacement and
+     * the axis it has to be performed on. Too long of a per-swipe delta may leave the viewport in
+     * an unexpected state after the target View is found. Too short of a per-swipe delta may cause
+     * your view to bounce because of {@link #maxAttempts} being reached before getting to the
+     * bottom.
+     * <p>
+     * The axis describes which direction where the target View is expected to be found. When the
+     * axis is {@link AxisPxDelta.Axis#VERTICAL}, the scroll happens first downwards and then
+     * upwards. When the axis is {@link AxisPxDelta.Axis#HORIZONTAL}, the scroll happens towards the
+     * end and then towards the start (LTR is resolved automatically).
      *
-     * @see <a href="https://developer.android.com/training/testing/espresso/recipes#targeting-non-default-windows">Espresso recipes - Target non-default windows | Android Developers</a>
+     * @see #maxAttempts
      */
     @Getter
     @Builder.Default
     @NonNull
-    private Matcher<View> scrollableViewMatcher = isRoot();
+    private AxisPxDelta axisPxDeltaPerScroll = new AxisPxDelta(AxisPxDelta.Axis.VERTICAL);
     /**
-     * Describes the direction looked after when scrolling, as well as how long each swipe should
-     * be. Too long of a per-swipe delta may leave the viewport in an unexpected state after the
-     * target View is found. Too short of a per-swipe delta may require an overly long timeout in
-     * order to get to scroll until the target view.
+     * Specifies a per-direction exit condition in the form of a maximum number of scrolls. If
+     * the given <code>targetViewMatcher</code> has not been satisfied after scrolling this many
+     * times in a direction, no further scrolls are attempted in that direction, following in to
+     * either try the opposite direction or give up and return if both directions have been tested.
      *
-     * The direction describes which direction where the target View is expected to be found. When
-     * using {@link DirectionalPxDelta.Towards#START} and {@link DirectionalPxDelta.Towards#END}
-     * LTR/RTL is resolved automatically.
+     * @see #axisPxDeltaPerScroll
+     */
+    @Getter
+    @Builder.Default
+    private int maxAttempts = 100;
+    /**
+     * Specifies an additional per-direction exit condition. This can be used to speed up cases in
+     * which you can reliably determine that <code>targetViewMatcher</code> is not going to be met
+     * before {@link #maxAttempts} is reached.
      *
-     * @see #timeoutAfter
+     * @see #maxAttempts
      */
     @Getter
     @Builder.Default
     @NonNull
-    private DirectionalPxDelta directionalPxDeltaPerScroll =
-        new DirectionalPxDelta(100F, DirectionalPxDelta.Towards.BOTTOM);
-    /**
-     * Specifies a timeout (along {@link #timeoutAfterUnit}. If the given {@link Matcher} has not
-     * been satisfied in the specified amount of time, a {@link androidx.test.espresso.NoMatchingViewException}
-     * will be thrown corresponding to the View described by said matcher. Bear in mind that, in
-     * cases where {@link #directionalPxDeltaPerScroll} describes a delta that is too small, too
-     * short of a timeout may stop enough scrolling from happening before the timeout is reached.
-     *
-     * @see #directionalPxDeltaPerScroll
-     * @see #timeoutAfterUnit
-     */
-    @Getter
-    @Builder.Default
-    private long timeoutAfter = 20 * 1000;
-    /**
-     * {@link TimeUnit} for {@link #timeoutAfter}.
-     *
-     * @see #timeoutAfter
-     */
-    @Getter
-    @Builder.Default
-    @NonNull
-    private TimeUnit timeoutAfterUnit = TimeUnit.MILLISECONDS;
+    private Matcher<View> abortViewMatcher = not(new IsAnything<View>());
   }
 
-  public static final class DirectionalPxDelta {
+  public static final class AxisPxDelta {
+    private static final float DEFAULT_DELTA_PX = 100F;
     @Getter
-    private final @Px
-    float pxDelta;
+    @Px
+    private final float pxDelta;
     @Getter
-    private final Towards towards;
+    private final Axis axis;
 
     /**
      * Uses the default px delta.
      *
-     * @param towards The direction where the target view is expected to be found.
+     * @param axis The direction where the target view is expected to be found.
      */
-    public DirectionalPxDelta(final Towards towards) {
-      this(Options.builder().build().getDirectionalPxDeltaPerScroll().pxDelta, towards);
+    public AxisPxDelta(final Axis axis) {
+      this(DEFAULT_DELTA_PX, axis);
     }
 
-    public DirectionalPxDelta(final @Px float pxDelta, final Towards towards) {
+    public AxisPxDelta(final @Px float pxDelta, final Axis axis) {
       this.pxDelta = pxDelta;
-      this.towards = towards;
+      this.axis = axis;
     }
 
-    public enum Towards {
-      START,
-      TOP,
-      END,
-      BOTTOM
+    AxisPxDelta reverse() {
+      return new AxisPxDelta(-pxDelta, axis);
+    }
+
+    public enum Axis {
+      VERTICAL,
+      HORIZONTAL
     }
   }
 
   /**
-   * An overload of {@link #onAutoScrolledToView(Matcher, Options)} with default configuration
-   * values.
+   * An overload of {@link #onAutoScrolledToView(Matcher, Matcher, Options)} with default
+   * configuration values.
    */
   public static ViewInteraction onAutoScrolledToView(
-      final @NonNull Matcher<View> targetViewMatcher) {
-    return onAutoScrolledToView(targetViewMatcher, Options.builder()
-        .build());
+      final @NonNull Matcher<View> targetViewMatcher,
+      final @NonNull Matcher<View> scrollableViewMatcher) {
+    return onAutoScrolledToView(
+        targetViewMatcher,
+        scrollableViewMatcher,
+        Options.builder().build());
   }
 
   /**
-   * Returns {@link androidx.test.espresso.Espresso#onView(Matcher)} with the given
-   * {@link Matcher<View>} after scrolling until a view hierarchy in which such condition is met, or
-   * when an indicated timeout is reached, whatever happens first.
+   * Returns {@link androidx.test.espresso.Espresso#onView(Matcher)} with
+   * <code>targetViewMatcher</code> after scrolling until a view hierarchy in which such condition
+   * is met.
    * <p>
-   * This works synchronously; the given {@link Matcher<View>} is guaranteed to be satisfied when
-   * this method returns.
+   * This works synchronously; if the given <code>targetViewMatcher</code> would ever be satisfiable
+   * from the current viewport and with the given <code>options</code>, it is guaranteed to be
+   * satisfied when this method returns.
    *
-   * @param targetViewMatcher A {@link Matcher<View>} representing the condition that is sought
-   *                          after.
-   * @param options           Customizable configuration for the scrolling. See fields in {@link Options} for
-   *                          defaults.
-   * @return {@link androidx.test.espresso.Espresso#onView(Matcher)} with the given
-   * {@link Matcher<View>}.
+   * @param targetViewMatcher A {@link Matcher} representing the condition that is sought after.
+   * @param scrollableViewMatcher A {@link Matcher} representing the {@link View} to scroll on. It
+   *                              and its children (recursively) are checked against
+   *                              <code>targetViewMatcher</code>.
+   * @param options           Customizable configuration for the scrolling. See fields in
+   *                          {@link Options} for defaults.
+   * @return {@link androidx.test.espresso.Espresso#onView(Matcher)} with
+   * <code>targetViewMatcher</code>.
    * @see Options#builder()
    */
   public static ViewInteraction onAutoScrolledToView(
       final @NonNull Matcher<View> targetViewMatcher,
+      final @NonNull Matcher<View> scrollableViewMatcher,
       final @NonNull OnAutoScrolledToView.Options options) {
-    return new OnAutoScrolledToViewImpl(targetViewMatcher, options).viewInteraction();
+    try {
+      new OnAutoScrolledToViewImpl(targetViewMatcher, scrollableViewMatcher, options, true).run();
+    } catch (final PerformException performException) {
+      final Throwable cause = performException.getCause();
+      if (cause instanceof
+          RepeatActionUntilViewStateOnAnotherViewViewAction.MaxAttemptsReachedException ||
+          cause instanceof
+              RepeatActionUntilViewStateOnAnotherViewViewAction.AbortViewStateReachedException) {
+        new OnAutoScrolledToViewImpl(
+            targetViewMatcher,
+            scrollableViewMatcher,
+            options.toBuilder()
+                .axisPxDeltaPerScroll(options.axisPxDeltaPerScroll.reverse())
+                .build(),
+            false).run();
+      }
+    }
+    return onView(targetViewMatcher);
   }
 }

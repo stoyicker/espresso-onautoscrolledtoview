@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +14,7 @@ public final class DemoActivity extends Activity {
   protected void onCreate(final Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     final RecyclerView recyclerView = new RecyclerView(this);
+    recyclerView.setId(R.id.my_recyclerview);
     recyclerView.setLayoutManager(new LinearLayoutManager(
         this,
         getIntent().getIntExtra(
@@ -21,7 +23,9 @@ public final class DemoActivity extends Activity {
         false));
     recyclerView.setAdapter(new DemoRecyclerViewAdapter());
     recyclerView.scrollToPosition(getIntent().getIntExtra(KEY_SCROLL_TO_POSITION, 0));
-    setContentView(recyclerView);
+    this.<ViewGroup>findViewById(android.R.id.content).addView(
+        recyclerView, new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
   }
 
   public static Intent newCallingIntent(

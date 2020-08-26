@@ -22,7 +22,9 @@ import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static onautoscrolledtoview.OnAutoScrolledToView.onAutoScrolledToView;
 
 public final class LTRHorizontalFromEndDemoActivityTest {
   @Rule
@@ -63,13 +65,25 @@ public final class LTRHorizontalFromEndDemoActivityTest {
 
   @Test
   public void element0ExistsWithAutoScroll() {
-    OnAutoScrolledToView.onAutoScrolledToView(
+    onAutoScrolledToView(
         withText("\n[0]\n"),
+        withId(R.id.my_recyclerview),
         OnAutoScrolledToView.Options.builder()
-            .directionalPxDeltaPerScroll(
-                new OnAutoScrolledToView.DirectionalPxDelta(
-                    OnAutoScrolledToView.DirectionalPxDelta.Towards.START))
+            .axisPxDeltaPerScroll(new OnAutoScrolledToView.AxisPxDelta(
+                OnAutoScrolledToView.AxisPxDelta.Axis.HORIZONTAL))
             .build())
         .check(matches(isDisplayed()));
+  }
+
+  @Test
+  public void elementMinus1DoesNotExistWithAutoScroll() {
+    onAutoScrolledToView(
+        withText("\n[-1]\n"),
+        withId(R.id.my_recyclerview),
+        OnAutoScrolledToView.Options.builder()
+            .axisPxDeltaPerScroll(new OnAutoScrolledToView.AxisPxDelta(
+                OnAutoScrolledToView.AxisPxDelta.Axis.HORIZONTAL))
+            .build())
+        .check(doesNotExist());
   }
 }
