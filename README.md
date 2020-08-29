@@ -2,7 +2,7 @@
 ### An Espresso ViewInteraction for finding views that do not exist
 
 ## Usage
-[ ![Download](https://api.bintray.com/packages/stoyicker/espresso-onautoscrolledtoview/library/images/download.svg) ](https://search.maven.org/search?q=g:com.github.stoyicker.espresso-onautoscrolledtoview)
+[ ![Download](https://api.bintray.com/packages/stoyicker/espresso-onautoscrolledtoview/library/images/download.svg) ](https://search.maven.org/search?q=g:com.github.stoyicker.onautoscrolledtoview)
 ```groovy
 repositories {
   jcenter()
