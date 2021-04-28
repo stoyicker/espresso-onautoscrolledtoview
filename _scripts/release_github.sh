@@ -13,7 +13,6 @@ BODY="{
 
 # Create the release in GitHub and extract its id from the response
 RESPONSE_BODY=$(curl -s \
-  -v \
   -u "${CIRCLE_USERNAME}":"${GITHUB_TOKEN}" \
   --header "Accept: application/vnd.github.v3+json" \
   --header "Content-Type: application/json; charset=utf-8" \
@@ -29,7 +28,6 @@ cp library/build/outputs/aar/library-release.aar library.aar
 # Attach library
 LIBRARY_UPLOAD_URL=$(echo ${UPLOAD_URL} | sed "s/{?name,label}/?name=library-${THIS_TAG}.aar/")
 curl -s \
-  -v \
   -u "${CIRCLE_USERNAME}":"${GITHUB_TOKEN}" \
   --header "Accept: application/vnd.github.v3+json" \
   --header "Content-Type: application/zip" \
@@ -42,7 +40,6 @@ cp demo/build/outputs/apk/debug/demo-debug.apk demo.apk
 # Attach demo
 DEMO_UPLOAD_URL=$(echo ${UPLOAD_URL} | sed "s/{?name,label}/?name=demo-${THIS_TAG}.apk/")
 curl -s \
-  -v \
   -u "${CIRCLE_USERNAME}":"${GITHUB_TOKEN}" \
   --header "Accept: application/vnd.github.v3+json" \
   --header "Content-Type: application/zip" \
