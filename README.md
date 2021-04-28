@@ -52,7 +52,7 @@ one is used to find the view to perform scrolling on (must be a direct or indire
 view depicted by the first one), and the third one carries configuration that you may use to 
 customize the scrolling behavior.
 
-You may use `Options.builder()` to get a builder instance. See [Options](library/src/main/java/onautoscrolledtoview/OnAutoScrolledToView.java#L24)
+You may use `Options.builder()` to get a builder instance. See [Options](library/src/main/java/onautoscrolledtoview/OnAutoScrolledToView.java#L25)
 for documentation and defaults that are used for each field if unset (or when using 
 `onAutoScrolledToView(Matcher<View>)`, the `Options`-less overload instead).
 
