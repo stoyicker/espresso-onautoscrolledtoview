@@ -37,14 +37,25 @@ jobs:
       - attach_workspace:
           at: .
       - run: ./_scripts/release_github.sh
-  release_library_on_bintray:
+  release_library_on_central:
     docker:
       - image: circleci/android:api-30
     steps:
       - checkout
       - attach_workspace:
           at: .
-      - run: ./gradlew library:bintrayUpload
+      - run:
+          name: Decript GPG secret keyring
+          command: openssl aes-256-cbc -md sha512 -iter 100000 -d -in secring.gpg.enc -out secring.gpg -k $GPG_SECRET_DECRIPTION_KEY
+          when: always
+      - run:
+          name: Upload library to Maven Central
+          command: ./gradlew :library:publishLibraryPublicationToSonatypeRepository --no-daemon --no-build-cache --refresh-dependencies
+          when: always
+      - run:
+          name: Close and release staging repository in Nexus
+          command: ./gradlew closeAndReleaseRepository
+          when: always
 workflows:
   version: 2.1
   check:
@@ -75,8 +86,8 @@ workflows:
           requires:
             - ensure_release_allowed
             - build_library
-      - release_library_on_bintray:
-          context: onautoscrolledtoview_release_bintray_oss
+      - release_library_on_central:
+          context: test-accessors_release_mavencentral
           filters:
             branches:
               ignore: /.*/
