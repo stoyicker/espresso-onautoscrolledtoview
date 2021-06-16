@@ -1,12 +1,13 @@
 #!/bin/bash
 set -e
-usage() {
-  echo "Usage: $0 -v <version> [-r <revision=HEAD>]" >&2
-  exit 1
-}
 
 VERSION=""
-REVISION="HEAD"
+REVISION="origin/HEAD"
+
+usage() {
+  echo "Usage: $0 -v <version> [-r <revision=${REVISION}]" >&2
+  exit 1
+}
 
 while getopts ":v:r" opt; do
   case $opt in
@@ -30,6 +31,7 @@ if [ -z "$VERSION" ]; then
   usage
 fi
 
-git tag ${VERSION} ${REVISION} -m "${VERSION}" &&
+git fetch &&
+  git tag ${VERSION} ${REVISION} -m "${VERSION}" &&
   git push --tags &&
   echo "New release ${VERSION} for revision $(git rev-parse --short "${REVISION}") requested successfully"
