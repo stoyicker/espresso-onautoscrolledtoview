@@ -72,3 +72,11 @@ publishing {
     }
   }
 }
+
+signing {
+  sign publishing.publications
+}
+
+ext["signing.keyId"] = "$System.env.GPG_KEYID"
+ext["signing.password"] = "$System.env.GPG_PASSWORD"
+ext["signing.secretKeyRingFile"] = "$rootProject.rootDir/secring.gpg"
